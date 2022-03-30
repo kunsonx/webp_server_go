@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -13,7 +12,7 @@ import (
 )
 
 func convert(c *fiber.Ctx) error {
-	//basic vars
+	// basic vars
 	var reqURI, _ = url.QueryUnescape(c.Path()) // /mypic/123.jpg
 
 	// delete ../ in reqURI to mitigate directory traversal
@@ -29,11 +28,7 @@ func convert(c *fiber.Ctx) error {
 	log.Debugf("Incoming connection from %s %s", c.IP(), imgFilename)
 
 	if !checkAllowedType(imgFilename) {
-		msg := "File extension not allowed! " + imgFilename
-		log.Warn(msg)
-		c.Status(http.StatusBadRequest)
-		_ = c.Send([]byte(msg))
-		return nil
+		return c.SendFile(rawImageAbs)
 	}
 
 	goodFormat := guessSupportedFormat(&c.Request().Header)
